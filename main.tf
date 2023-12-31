@@ -2,7 +2,7 @@
 resource "aws_vpc" "main_vpc" {
   cidr_block = var.vpc_cidr_block
   tags = {
-    Name = "VPC_Kubernetes"
+    Name = "VPC-${var.project}"
   }
 }
 
@@ -10,7 +10,7 @@ resource "aws_vpc" "main_vpc" {
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.main_vpc.id
   tags = {
-    Name = "Internet_Gateway_Kubernetes"
+    Name = "Internet_Gateway-${var.project}"
   }
 }
 
@@ -23,7 +23,7 @@ resource "aws_subnet" "public_subnet" {
   cidr_block              = var.public_subnet_cidr[count.index]
   map_public_ip_on_launch = true
   tags = {
-    Name = "Subnet_Public_Kubernetes-${var.env}-${count.index + 1}"
+    Name = "Subnet_Public-${var.project}-${var.env}-${count.index + 1}"
   }
 }
 
@@ -35,7 +35,7 @@ resource "aws_route_table" "route_tables_public" {
     gateway_id = aws_internet_gateway.internet_gateway.id
   }
   tags = {
-    Name = "Route_Tables_Public_Kubernetes-${var.env}"
+    Name = "Route_Tables_Public-${var.project}-${var.env}"
   }
 }
 
@@ -57,7 +57,7 @@ resource "aws_subnet" "private_subnet" {
   vpc_id     = aws_vpc.main_vpc.id
   cidr_block = var.private_subnet_cidr[count.index]
   tags = {
-    Name = "Subnet_Private_Kubernetes-${var.env}-${count.index + 1}"
+    Name = "Subnet_Private-${var.project}-${var.env}-${count.index + 1}"
   }
 }
 
@@ -70,7 +70,7 @@ resource "aws_route_table" "route_tables_private" {
     gateway_id = aws_nat_gateway.nat[count.index].id
   }
   tags = {
-    Name = "Route_Tables_Private_Kubernetes-${var.env}-${count.index + 1}"
+    Name = "Route_Tables_Private-${var.project}-${var.env}-${count.index + 1}"
   }
 }
 
@@ -85,7 +85,7 @@ resource "aws_eip" "nat" {
   count  = length(var.private_subnet_cidr)
   domain = "vpc"
   tags = {
-    Name = "${var.env}-Elastic_IP-${count.index + 1}"
+    Name = "Elastic_IP-${var.project}-${var.env}-${count.index + 1}"
   }
 }
 
@@ -94,7 +94,7 @@ resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = element(aws_subnet.public_subnet[*].id, count.index)
   tags = {
-    Name = "${var.env}-NAT-Gateway-${count.index + 1}"
+    Name = "NAT-Gateway-${var.project}-${var.env}-${count.index + 1}"
   }
 
 }
@@ -106,6 +106,10 @@ variable "vpc_cidr_block" {
 
 variable "env" {
   default = "DEV"
+}
+
+variable "project" {
+  default = "k8s"
 }
 
 variable "public_subnet_cidr" {
