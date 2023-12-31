@@ -1,4 +1,4 @@
-# create an aws vpc for kubernetes
+# create an aws vpc
 resource "aws_vpc" "main_vpc" {
   cidr_block = var.vpc_cidr_block
   tags = {
@@ -6,7 +6,7 @@ resource "aws_vpc" "main_vpc" {
   }
 }
 
-# create an internet gateway for kubernetes
+# create an internet gateway for ${var.project}
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.main_vpc.id
   tags = {
@@ -16,7 +16,7 @@ resource "aws_internet_gateway" "internet_gateway" {
 
 #####--------------PUBLIC Subnets--------------#####
 
-# create public subnets for kubernetes
+# create public subnets for ${var.project}
 resource "aws_subnet" "public_subnet" {
   count                   = length(var.public_subnet_cidr)
   vpc_id                  = aws_vpc.main_vpc.id
@@ -27,7 +27,7 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-# create a route table for public subnets in kubernetes
+# create a route table for public subnets in ${var.project}
 resource "aws_route_table" "route_tables_public" {
   vpc_id = aws_vpc.main_vpc.id
   route {
@@ -51,7 +51,7 @@ resource "aws_route_table_association" "public_association" {
 #####--------------PRIVATE Subnets--------------#####
 
 
-# create private subnets for kubernetes
+# create private subnets for ${var.project}
 resource "aws_subnet" "private_subnet" {
   count      = length(var.private_subnet_cidr)
   vpc_id     = aws_vpc.main_vpc.id
@@ -61,7 +61,7 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-# create route tables for private subnets in kubernetes
+# create route tables for private subnets in ${var.project}
 resource "aws_route_table" "route_tables_private" {
   count  = length(var.private_subnet_cidr)
   vpc_id = aws_vpc.main_vpc.id
