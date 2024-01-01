@@ -1,33 +1,59 @@
+######################## Variables ########################
+variable "project_name" {
+  default = "k8s"
+}
+variable "vpc_cidr_block" {
+  description = "cidr block for the vpc"
+  default     = "10.10.0.0/16"
+}
+variable "env" {
+  default = "DEV"
+}
+variable "public_subnet_cidr" {
+  default = [
+    "10.10.20.0/24",
+    "10.10.21.0/24"
+  ]
+}
+variable "private_subnet_cidr" {
+  default = [
+    "10.10.10.0/24",
+    "10.10.11.0/24"
+  ]
+}
+
+#####--------------VPC + Internet Gateway--------------####
+
 # create an aws vpc
 resource "aws_vpc" "main_vpc" {
   cidr_block = var.vpc_cidr_block
   tags = {
-    Name = "VPC-${var.project}"
+    Name = "VPC-${var.project_name}"
   }
 }
 
-# create an internet gateway for ${var.project}
+# create an internet gateway 
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.main_vpc.id
   tags = {
-    Name = "Internet_Gateway-${var.project}"
+    Name = "Internet_Gateway-${var.project_name}"
   }
 }
 
 #####--------------PUBLIC Subnets--------------#####
 
-# create public subnets for ${var.project}
+# create public subnets for ${var.project_name}
 resource "aws_subnet" "public_subnet" {
   count                   = length(var.public_subnet_cidr)
   vpc_id                  = aws_vpc.main_vpc.id
   cidr_block              = var.public_subnet_cidr[count.index]
   map_public_ip_on_launch = true
   tags = {
-    Name = "Subnet_Public-${var.project}-${var.env}-${count.index + 1}"
+    Name = "Subnet_Public-${var.project_name}-${var.env}-${count.index + 1}"
   }
 }
 
-# create a route table for public subnets in ${var.project}
+# create a route table for public subnets in ${var.project_name}
 resource "aws_route_table" "route_tables_public" {
   vpc_id = aws_vpc.main_vpc.id
   route {
@@ -35,7 +61,7 @@ resource "aws_route_table" "route_tables_public" {
     gateway_id = aws_internet_gateway.internet_gateway.id
   }
   tags = {
-    Name = "Route_Tables_Public-${var.project}-${var.env}"
+    Name = "Route_Tables_Public-${var.project_name}-${var.env}"
   }
 }
 
@@ -51,17 +77,17 @@ resource "aws_route_table_association" "public_association" {
 #####--------------PRIVATE Subnets--------------#####
 
 
-# create private subnets for ${var.project}
+# create private subnets for ${var.project_name}
 resource "aws_subnet" "private_subnet" {
   count      = length(var.private_subnet_cidr)
   vpc_id     = aws_vpc.main_vpc.id
   cidr_block = var.private_subnet_cidr[count.index]
   tags = {
-    Name = "Subnet_Private-${var.project}-${var.env}-${count.index + 1}"
+    Name = "Subnet_Private-${var.project_name}-${var.env}-${count.index + 1}"
   }
 }
 
-# create route tables for private subnets in ${var.project}
+# create route tables for private subnets in ${var.project_name}
 resource "aws_route_table" "route_tables_private" {
   count  = length(var.private_subnet_cidr)
   vpc_id = aws_vpc.main_vpc.id
@@ -70,7 +96,7 @@ resource "aws_route_table" "route_tables_private" {
     gateway_id = aws_nat_gateway.nat[count.index].id
   }
   tags = {
-    Name = "Route_Tables_Private-${var.project}-${var.env}-${count.index + 1}"
+    Name = "Route_Tables_Private-${var.project_name}-${var.env}-${count.index + 1}"
   }
 }
 
@@ -85,7 +111,7 @@ resource "aws_eip" "nat" {
   count  = length(var.private_subnet_cidr)
   domain = "vpc"
   tags = {
-    Name = "Elastic_IP-${var.project}-${var.env}-${count.index + 1}"
+    Name = "Elastic_IP-${var.project_name}-${var.env}-${count.index + 1}"
   }
 }
 
@@ -94,36 +120,9 @@ resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = element(aws_subnet.public_subnet[*].id, count.index)
   tags = {
-    Name = "NAT-Gateway-${var.project}-${var.env}-${count.index + 1}"
+    Name = "NAT-Gateway-${var.project_name}-${var.env}-${count.index + 1}"
   }
 
-}
-# variable for the cidr block of the vpc
-variable "vpc_cidr_block" {
-  description = "cidr block for the vpc"
-  default     = "10.10.0.0/16"
-}
-
-variable "env" {
-  default = "DEV"
-}
-
-variable "project" {
-  default = "k8s"
-}
-
-variable "public_subnet_cidr" {
-  default = [
-    "10.10.20.0/24",
-    "10.10.21.0/24"
-  ]
-}
-
-variable "private_subnet_cidr" {
-  default = [
-    "10.10.10.0/24",
-    "10.10.11.0/24"
-  ]
 }
 
 output "vpc_id" {
