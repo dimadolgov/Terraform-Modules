@@ -31,3 +31,22 @@ This Terraform module facilitates the creation of an Amazon Virtual Private Clou
 - **private_subnet_ids:** Outputs the IDs of the created private subnets.
 
 This Terraform module provides a foundation for setting up a secure and scalable AWS infrastructure with separate public and private network segments. It is suitable for deploying applications that require both internet-facing and internal components, such as Kubernetes clusters. Adjust the variables as needed to tailor the VPC to your specific requirements.
+
+## Examples
+# AWS VPC Terraform Module
+
+This Terraform module creates an Amazon Virtual Private Cloud (VPC) with public and private subnets.
+
+## Usage
+
+### Development Environment
+
+```hcl
+module "vpc-dev" {
+  source              = "git@github.com:dimadolgov/Terraform_Modules.git//aws_network"
+  project_name        = "Project_qqq"
+  env                 = "development"
+  vpc_cidr_block      = "30.30.0.0/16"
+  public_subnet_cidr  = ["30.30.10.0/24", "30.30.11.0/24"]
+  private_subnet_cidr = []
+}
