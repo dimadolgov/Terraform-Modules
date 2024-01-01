@@ -1,13 +1,14 @@
 ######################## Variables ########################
+
 variable "project_name" {
-  default = "k8s"
+  default = "default"
 }
 variable "vpc_cidr_block" {
   description = "cidr block for the vpc"
   default     = "10.10.0.0/16"
 }
 variable "env" {
-  default = "DEV"
+  default = "default"
 }
 variable "public_subnet_cidr" {
   default = [
@@ -22,9 +23,8 @@ variable "private_subnet_cidr" {
   ]
 }
 
-#####--------------VPC + Internet Gateway--------------####
-
-# create an aws vpc
+######################## VPC + Internet Gateway ########################
+# Create an AWS Virtual Private Cloud (VPC)
 resource "aws_vpc" "main_vpc" {
   cidr_block = var.vpc_cidr_block
   tags = {
@@ -32,7 +32,7 @@ resource "aws_vpc" "main_vpc" {
   }
 }
 
-# create an internet gateway 
+# Create an Internet Gateway and associate it with the VPC
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.main_vpc.id
   tags = {
@@ -40,9 +40,8 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
-#####--------------PUBLIC Subnets--------------#####
-
-# create public subnets for ${var.project_name}
+######################## Public Subnets ########################
+# create public subnets
 resource "aws_subnet" "public_subnet" {
   count                   = length(var.public_subnet_cidr)
   vpc_id                  = aws_vpc.main_vpc.id
@@ -53,7 +52,7 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-# create a route table for public subnets in ${var.project_name}
+# create a route table for public subnets
 resource "aws_route_table" "route_tables_public" {
   vpc_id = aws_vpc.main_vpc.id
   route {
@@ -74,10 +73,8 @@ resource "aws_route_table_association" "public_association" {
 }
 
 
-#####--------------PRIVATE Subnets--------------#####
-
-
-# create private subnets for ${var.project_name}
+######################## Private Subnets ########################
+# create private subnets
 resource "aws_subnet" "private_subnet" {
   count      = length(var.private_subnet_cidr)
   vpc_id     = aws_vpc.main_vpc.id
@@ -87,7 +84,7 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-# create route tables for private subnets in ${var.project_name}
+# create route tables for private subnets
 resource "aws_route_table" "route_tables_private" {
   count  = length(var.private_subnet_cidr)
   vpc_id = aws_vpc.main_vpc.id
@@ -107,6 +104,8 @@ resource "aws_route_table_association" "private_association" {
   subnet_id      = aws_subnet.private_subnet[count.index].id
 }
 
+######################## NAT + Gateway ########################
+# Create Elastic IPs for NAT Gateways in private subnets
 resource "aws_eip" "nat" {
   count  = length(var.private_subnet_cidr)
   domain = "vpc"
@@ -115,6 +114,7 @@ resource "aws_eip" "nat" {
   }
 }
 
+# Create NAT Gateways in public subnets and associate with Elastic IPs
 resource "aws_nat_gateway" "nat" {
   count         = length(var.private_subnet_cidr)
   allocation_id = aws_eip.nat[count.index].id
@@ -122,9 +122,9 @@ resource "aws_nat_gateway" "nat" {
   tags = {
     Name = "NAT-Gateway-${var.project_name}-${var.env}-${count.index + 1}"
   }
-
 }
 
+######################## Outputs ########################
 output "vpc_id" {
   value = aws_vpc.main_vpc.id
 }
