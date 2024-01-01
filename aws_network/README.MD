@@ -44,9 +44,19 @@ This Terraform module creates an Amazon Virtual Private Cloud (VPC) with public 
 ```hcl
 module "vpc-dev" {
   source              = "git@github.com:dimadolgov/Terraform_Modules.git//aws_network"
-  project_name        = "Project_qqq"
+  project_name        = "Project_DEV"
   env                 = "development"
   vpc_cidr_block      = "30.30.0.0/16"
   public_subnet_cidr  = ["30.30.10.0/24", "30.30.11.0/24"]
   private_subnet_cidr = []
 }
+
+module "vpc-prod" {
+  source              = "git@github.com:dimadolgov/Terraform_Modules.git//aws_network"
+  project_name        = "Project_PROD"
+  env                 = "production"
+  vpc_cidr_block      = "30.30.0.0/16"
+  public_subnet_cidr  = ["30.30.10.0/24", "30.30.11.0/24", "30.30.12.0/24", "30.30.13.0/24"]
+  private_subnet_cidr = ["30.30.20.0/24", "30.30.21.0/24"]
+}
+
