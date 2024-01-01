@@ -3,9 +3,9 @@
 This Terraform module facilitates the creation of an Amazon Virtual Private Cloud (VPC) in AWS, configured with public and private subnets. The module provisions the following components:
 
 ## Variables
-- **project_name:** A unique identifier for the project (default: "k8s").
+- **project_name:** A unique identifier for the project (default: "default").
 - **vpc_cidr_block:** The CIDR block for the VPC (default: "10.10.0.0/16").
-- **env:** The environment identifier (default: "DEV").
+- **env:** The environment identifier (default: "default").
 - **public_subnet_cidr:** List of CIDR blocks for public subnets.
 - **private_subnet_cidr:** List of CIDR blocks for private subnets.
 
