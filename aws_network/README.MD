@@ -46,8 +46,8 @@ module "vpc-dev" {
   source              = "git@github.com:dimadolgov/Terraform_Modules.git//aws_network"
   project_name        = "Project_DEV"
   env                 = "development"
-  vpc_cidr_block      = "30.30.0.0/16"
-  public_subnet_cidr  = ["30.30.10.0/24", "30.30.11.0/24"]
+  vpc_cidr_block      = "50.50.0.0/16"
+  public_subnet_cidr  = ["50.50.10.0/24", "50.50.11.0/24"]
   private_subnet_cidr = []
 }
 
