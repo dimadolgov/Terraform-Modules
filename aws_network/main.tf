@@ -1,5 +1,4 @@
 ######################## Variables ########################
-
 variable "project_name" {
   default = "default"
 }
