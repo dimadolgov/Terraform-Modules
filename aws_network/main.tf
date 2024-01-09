@@ -115,7 +115,7 @@ resource "aws_eip" "nat" {
 
 # Create NAT Gateways in public subnets and associate with Elastic IPs
 resource "aws_nat_gateway" "nat" {
-  count         = length(var.private_subnet_cidr)
+  count         = 0 #length(var.private_subnet_cidr)
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = element(aws_subnet.public_subnet[*].id, count.index)
   tags = {
